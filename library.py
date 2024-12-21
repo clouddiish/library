@@ -155,7 +155,7 @@ def login(library):
         answ = input("Do you want to register? (Y/N) ").lower()
 
         if answ == "y":
-            library.add_user(input_username)
+            library.add_user(input_username, False)
             print("User registered.")
             return
         elif answ == "n":
