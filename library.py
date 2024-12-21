@@ -9,9 +9,13 @@ class BookNotFoundError(Exception):
 class Book:
     last_id = 0
 
+    @classmethod
+    def generate_id(cls):
+        cls.last_id += 1
+        return cls.last_id
+
     def __init__(self, title, author):
-        self.id = self.last_id + 1
-        Book.last_id = self.last_id + 1
+        self.id = Book.generate_id()
         self.title = title
         self.author = author
         self.available = True
@@ -40,13 +44,12 @@ class User:
             print("No books borrowed.")
         else:
             for book in self.borrowed_books:
-                print("Borrowed books:")
                 print(f"- ID {book.id}: {book.title} by {book.author}")
 
 
 class Library:
     def __init__(self):
-        self.users = []
+        self.users = {}
         self.books = []
 
     def print_books(self, books):
@@ -57,21 +60,17 @@ class Library:
 
     def print_users(self, users):
         for user in users:
-            print(
-                f"- User: {user.username}, books borrowed: {len(user.borrowed_books)}"
-            )
+            print(f"- User: {user}, books borrowed: {len(users[user].borrowed_books)}")
 
     def username_exists(self, user_name):
-        for user in self.users:
-            if user_name == user.username:
-                return True
+        if user_name in self.users:
+            return True
 
         return False
 
     def get_user(self, user_name):
-        for user in self.users:
-            if user.username == user_name:
-                return user
+        if self.username_exists(user_name):
+            return self.users[user_name]
 
         raise UserNotFoundError
 
@@ -83,13 +82,16 @@ class Library:
         raise BookNotFoundError
 
     def add_user(self, user_name):
-        self.users.append(User(user_name))
+        if user_name not in self.users:
+            self.users[user_name] = User(user_name)
+        else:
+            print("This username is already taken.")
 
     def add_book(self, title, author):
         self.books.append(Book(title, author))
 
     def remove_user(self, user_name):
-        self.users.remove(self.get_user(user_name))
+        del self.users[user_name]
 
     def remove_book(self, book_id):
         self.books.remove(self.get_book(book_id))
@@ -106,15 +108,18 @@ class Library:
             print("Book not available.")
 
     def unborrow(self, book_id, user_name):
-        book = self.get_book(book_id)
-        user = self.get_user(user_name)
+        try:
+            book = self.get_book(book_id)
+            user = self.get_user(user_name)
 
-        if book in user.borrowed_books:
-            book.unborrow()
-            user.unborrow(book)
-            print("Book returned.")
-        else:
-            print("You did not borrow this book.")
+            if book in user.borrowed_books:
+                book.unborrow()
+                user.unborrow(book)
+                print("Book returned.")
+            else:
+                print("You did not borrow this book.")
+        except BookNotFoundError:
+            print("Book does not exist in the library.")
 
     def get_available(self):
         return [book for book in self.books if book.available == True]
@@ -139,7 +144,10 @@ def login(library):
 
         if answ == "y":
             library.add_user(input_username)
-            print("User registered. Please log in again.")
+            print("User registered.")
+            return
+        elif answ == "n":
+            return
         else:
             print("Please log in again.")
 
@@ -151,15 +159,19 @@ def login(library):
 def do_action(action, library, user_name):
     match action:
         case "vb":
+            print("ALL BOOKS:")
             library.print_books(library.books)
 
         case "vu":
+            print("LIBRARY USERS:")
             library.print_users(library.users)
 
         case "vmb":
+            print("MY BORROWED BOOKS:")
             library.get_user(user_name).print_borrowed()
 
         case "vab":
+            print("AVAILABLE BOOKS:")
             library.print_books(library.get_available())
 
         case "bb":
@@ -175,34 +187,24 @@ def do_action(action, library, user_name):
 
 
 def action_loop(library, user_name):
-    action = input(
+    action_menu = """What do you want to do?
+        - vb - view all books
+        - vu - view all users
+        - vmb - view my books
+        - vab - view available books
+        - bb - borrow a book
+        - rb - return a book
+        - lgo - logout
         """
-                    What do you want to do?
-                    - vb - view all books
-                    - vu - view all users
-                    - vmb - view my books
-                    - vab - view available books
-                    - bb - borrow a book
-                    - rb - return a book
-                    - lgo - logout
-                    """
-    ).lower()
 
-    while action != "lgo":
+    while True:
+        print()
+        action = input(action_menu).lower()
+
+        if action == "lgo":
+            break
+
         do_action(action, library, user_name)
-
-        action = input(
-            """
-                What do you want to do?
-                - vb - view all books
-                - vu - view all users
-                - vmb - view my books
-                - vab - view available books
-                - bb - borrow a book
-                - rb - return a book
-                - lgo - logout
-                """
-        ).lower()
 
 
 def run():
@@ -210,18 +212,20 @@ def run():
     library_init(town_lib)
 
     while True:
+        print()
         menu_choice = input(
-            """
-            Welcome to the library. What do you want to do?
-            - l - log in
-            - e - exit the library
-            """
+            """Welcome to the library. What do you want to do?
+        - l - log in
+        - e - exit the library
+        """
         ).lower()
 
         try:
             match menu_choice:
                 case "l":
                     logged_user = login(town_lib)
+                    if logged_user == None:
+                        continue
                     action_loop(town_lib, logged_user)
                 case "e":
                     sure = input("Are you sure? (Y/N) ").lower()
@@ -233,7 +237,7 @@ def run():
             print("User not found.")
             action_loop(town_lib, logged_user)
         except BookNotFoundError:
-            print("Book not found.")
+            print("Book does not exist in the library.")
             action_loop(town_lib, logged_user)
 
 
