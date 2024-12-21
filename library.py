@@ -28,9 +28,10 @@ class Book:
 
 
 class User:
-    def __init__(self, username):
+    def __init__(self, username, is_admin):
         self.username = username
         self.borrowed_books = []
+        self.is_admin = is_admin
 
     def borrow(self, book):
         self.borrowed_books.append(book)
@@ -46,6 +47,9 @@ class User:
             for book in self.borrowed_books:
                 print(f"- ID {book.id}: {book.title} by {book.author}")
 
+    def change_admin(self):
+        self.is_admin = not self.is_admin
+
 
 class Library:
     def __init__(self):
@@ -60,7 +64,9 @@ class Library:
 
     def print_users(self, users):
         for user in users:
-            print(f"- User: {user}, books borrowed: {len(users[user].borrowed_books)}")
+            print(
+                f"- User: {user}, books borrowed: {len(users[user].borrowed_books)}, admin: {users[user].is_admin}"
+            )
 
     def username_exists(self, user_name):
         if user_name in self.users:
@@ -81,9 +87,9 @@ class Library:
 
         raise BookNotFoundError
 
-    def add_user(self, user_name):
+    def add_user(self, user_name, is_admin):
         if user_name not in self.users:
-            self.users[user_name] = User(user_name)
+            self.users[user_name] = User(user_name, is_admin)
         else:
             print("This username is already taken.")
 
@@ -91,10 +97,16 @@ class Library:
         self.books.append(Book(title, author))
 
     def remove_user(self, user_name):
-        del self.users[user_name]
+        try:
+            del self.users[user_name]
+        except KeyError:
+            raise UserNotFoundError
 
     def remove_book(self, book_id):
-        self.books.remove(self.get_book(book_id))
+        try:
+            self.books.remove(self.get_book(book_id))
+        except BookNotFoundError:
+            raise BookNotFoundError
 
     def borrow(self, book_id, user_name):
         book = self.get_book(book_id)
@@ -130,9 +142,9 @@ def library_init(library):
     library.add_book("Def", "Cee Dee")
     library.add_book("Ghi", "Eri Foo")
 
-    library.add_user("Gina")
-    library.add_user("Hannah")
-    library.add_user("Izzy")
+    library.add_user("Gina", True)
+    library.add_user("Hannah", False)
+    library.add_user("Izzy", False)
 
 
 def login(library):
@@ -159,26 +171,88 @@ def login(library):
 def do_action(action, library, user_name):
     match action:
         case "vb":
+            # view all books
+            if not library.get_user(user_name).is_admin:
+                print("Action not allowed")
+                return
             print("ALL BOOKS:")
             library.print_books(library.books)
 
         case "vu":
+            # view all users
+            if not library.get_user(user_name).is_admin:
+                print("Action not allowed")
+                return
             print("LIBRARY USERS:")
             library.print_users(library.users)
 
+        case "au":
+            # add user
+            if not library.get_user(user_name).is_admin:
+                print("Action not allowed")
+                return
+            new_username = input("New username: ")
+            library.add_user(new_username, False)
+            print("User added.")
+
+        case "ab":
+            # add book
+            if not library.get_user(user_name).is_admin:
+                print("Action not allowed")
+                return
+            new_title = input("New title: ")
+            new_author = input("New author: ")
+            library.add_book(new_title, new_author)
+            print("Book added.")
+
+        case "rmu":
+            # remove user
+            if not library.get_user(user_name).is_admin:
+                print("Action not allowed")
+                return
+            del_username = input("Username to remove: ")
+            library.remove_user(del_username)
+            print("User removed.")
+
+        case "rmb":
+            # remove book
+            if not library.get_user(user_name).is_admin:
+                print("Action not allowed")
+                return
+            del_bookid = int(input("Book ID to remove: "))
+            library.remove_book(del_bookid)
+            print("Book removed.")
+
+        case "cua":
+            # change user admin status
+            if not library.get_user(user_name).is_admin:
+                print("Action not allowed")
+                return
+            usr_name = input("Username to change admin status: ")
+
+            if usr_name != user_name:
+                library.get_user(usr_name).change_admin()
+                print("Admin status changed.")
+            else:
+                print("You cannot change your own admin status.")
+
         case "vmb":
+            # view my borrowed books
             print("MY BORROWED BOOKS:")
             library.get_user(user_name).print_borrowed()
 
         case "vab":
+            # view available books
             print("AVAILABLE BOOKS:")
             library.print_books(library.get_available())
 
         case "bb":
+            # borrow a book
             book_id = int(input("ID of the book you want to borrow: "))
             library.borrow(book_id, user_name)
 
         case "rb":
+            # return a book
             book_id = int(input("ID of the book you want to return: "))
             library.unborrow(book_id, user_name)
 
@@ -187,9 +261,14 @@ def do_action(action, library, user_name):
 
 
 def action_loop(library, user_name):
-    action_menu = """What do you want to do?
+    admin_menu = """What do you want to do?
         - vb - view all books
         - vu - view all users
+        - au - add user
+        - ab - add book
+        - rmu - remove user
+        - rmb - remove book
+        - cua - change user admin status
         - vmb - view my books
         - vab - view available books
         - bb - borrow a book
@@ -199,7 +278,7 @@ def action_loop(library, user_name):
 
     while True:
         print()
-        action = input(action_menu).lower()
+        action = input(admin_menu).lower()
 
         if action == "lgo":
             break
