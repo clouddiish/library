@@ -276,9 +276,20 @@ def action_loop(library, user_name):
         - lgo - logout
         """
 
+    user_menu = """What do you want to do?
+        - vmb - view my books
+        - vab - view available books
+        - bb - borrow a book
+        - rb - return a book
+        - lgo - logout
+        """
+
     while True:
         print()
-        action = input(admin_menu).lower()
+        if library.get_user(user_name).is_admin:
+            action = input(admin_menu).lower()
+        else:
+            action = input(user_menu).lower()
 
         if action == "lgo":
             break
