@@ -331,4 +331,4 @@ def run():
             action_loop(town_lib, logged_user)
 
 
-run()
+# run()
