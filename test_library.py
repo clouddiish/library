@@ -16,3 +16,20 @@ def test_add_user():
     added_user = lib.users[user_name]
     assert added_user.username == user_name, "The username is incorrect"
     assert added_user.is_admin == is_admin, "The admin status of the user is incorrect"
+
+
+def test_add_book():
+    # arrange
+    lib = Library()
+    title = "Test Title"
+    author = "Test author"
+
+    # act
+    lib.add_book(title, author)
+
+    # assert
+    assert len(lib.books) == 1, "Book was not added to the library"
+    added_book = lib.books[0]
+    assert added_book.title == title, "Book's title is incorrect"
+    assert added_book.author == author, "Book's author is incorrect"
+    assert added_book.available == True, "Book's availability should be True by default"
