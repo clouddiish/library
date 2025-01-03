@@ -1,5 +1,5 @@
 import pytest
-from library import Book, User, Library
+from library import Book, User, Library, UserNotFoundError, BookNotFoundError
 
 
 def test_add_user():
@@ -45,3 +45,12 @@ def test_remove_user():
 
     # assert
     assert len(lib.users) == 0, "User was not removed"
+
+
+def test_remove_nonexistent_user():
+    # arrange
+    lib = Library()
+
+    # act, assert
+    with pytest.raises(UserNotFoundError) as excinfo:
+        lib.remove_user("Test user")
