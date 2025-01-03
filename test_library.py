@@ -131,3 +131,13 @@ def test_borrow_unavailable_book(clear_last_id):
         len(lib.users["Test user 2"].borrowed_books) == 0
     ), "Book was added to borrowed books of the user"
     assert lib.books[0].available == False, "Book availability status is not False"
+
+
+def test_borrow_nonexistent_book(clear_last_id):
+    # arrange
+    lib = Library()
+    lib.add_user("Test user", False)
+
+    # act, assert
+    with pytest.raises(BookNotFoundError):
+        lib.borrow(1, "Test user")
