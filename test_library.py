@@ -185,3 +185,19 @@ def test_unborrow_not_borrowed(capsys, clear_last_id):
     assert (
         first_output == "You did not borrow this book."
     ), "Message was not printed to the user"
+
+
+def test_unborrow_nonexistent_book(capsys, clear_last_id):
+    # arrange
+    lib = Library()
+    lib.add_user("Test user", False)
+
+    # act
+    lib.unborrow(1, "Test user")
+    captured = capsys.readouterr().out.split("\n")
+    first_output = captured[0]
+
+    # assert
+    assert (
+        first_output == "Book does not exist in the library."
+    ), "Message was not printed to the user"
