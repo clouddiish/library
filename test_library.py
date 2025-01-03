@@ -2,6 +2,7 @@ import pytest
 from library import Book, User, Library, UserNotFoundError, BookNotFoundError
 
 
+# arrange
 @pytest.fixture
 def clear_last_id():
     Book.last_id = 0
@@ -71,7 +72,7 @@ def test_remove_nonexistent_user():
     lib = Library()
 
     # act, assert
-    with pytest.raises(UserNotFoundError) as excinfo:
+    with pytest.raises(UserNotFoundError):
         lib.remove_user("Test user")
 
 
@@ -85,3 +86,12 @@ def test_remove_book(clear_last_id):
 
     # assert
     assert len(lib.books) == 0, "Book was not removed"
+
+
+def test_remove_nonexistent_book(clear_last_id):
+    # arrange
+    lib = Library()
+
+    # act, assert
+    with pytest.raises(BookNotFoundError):
+        lib.remove_book(5)
