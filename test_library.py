@@ -149,3 +149,39 @@ def test_borrow_nonexistent_book(clear_last_id):
     # act, assert
     with pytest.raises(BookNotFoundError):
         lib.borrow(1, "Test user")
+
+
+def test_unborrow(clear_last_id):
+    # arrange
+    lib = Library()
+    lib.add_user("Test user", False)
+    lib.add_book("Test title", "Test author")
+
+    # act
+    lib.borrow(1, "Test user")
+    lib.unborrow(1, "Test user")
+
+    # assert
+    assert (
+        len(lib.users["Test user"].borrowed_books) == 0
+    ), "Book was not removed from borrowed books of the user"
+    assert (
+        lib.books[0].available == True
+    ), "Book availability status was not changed to True"
+
+
+def test_unborrow_not_borrowed(capsys, clear_last_id):
+    # arrange
+    lib = Library()
+    lib.add_user("Test user", False)
+    lib.add_book("Test title", "Test author")
+
+    # act
+    lib.unborrow(1, "Test user")
+    captured = capsys.readouterr().out.split("\n")
+    first_output = captured[0]
+
+    # assert
+    assert (
+        first_output == "You did not borrow this book."
+    ), "Message was not printed to the user"
