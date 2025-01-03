@@ -44,7 +44,6 @@ def test_add_book():
 
 def test_get_book(clear_last_id):
     # arrange
-    Book.last_id = 0
     lib = Library()
     lib.add_book("Test title", "Test author")
 
@@ -53,6 +52,15 @@ def test_get_book(clear_last_id):
 
     # assert
     assert found_book.id == 1
+
+
+def test_get_nonexistent_book(clear_last_id):
+    # arrange
+    lib = Library()
+
+    # act, assert
+    with pytest.raises(BookNotFoundError):
+        found_book = lib.get_book(1)
 
 
 def test_remove_user():
