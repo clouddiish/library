@@ -33,3 +33,15 @@ def test_add_book():
     assert added_book.title == title, "Book's title is incorrect"
     assert added_book.author == author, "Book's author is incorrect"
     assert added_book.available == True, "Book's availability should be True by default"
+
+
+def test_remove_user():
+    # arrange
+    lib = Library()
+    lib.add_user("Test user", False)
+
+    # act
+    lib.remove_user("Test user")
+
+    # assert
+    assert len(lib.users) == 0, "User was not removed"
