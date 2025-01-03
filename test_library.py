@@ -2,6 +2,11 @@ import pytest
 from library import Book, User, Library, UserNotFoundError, BookNotFoundError
 
 
+@pytest.fixture
+def clear_last_id():
+    Book.last_id = 0
+
+
 def test_add_user():
     # arrange
     lib = Library()
@@ -20,6 +25,7 @@ def test_add_user():
 
 def test_add_book():
     # arrange
+    Book.last_id = 0
     lib = Library()
     title = "Test Title"
     author = "Test author"
@@ -33,6 +39,19 @@ def test_add_book():
     assert added_book.title == title, "Book's title is incorrect"
     assert added_book.author == author, "Book's author is incorrect"
     assert added_book.available == True, "Book's availability should be True by default"
+
+
+def test_get_book(clear_last_id):
+    # arrange
+    Book.last_id = 0
+    lib = Library()
+    lib.add_book("Test title", "Test author")
+
+    # act
+    found_book = lib.get_book(1)
+
+    # assert
+    assert found_book.id == 1
 
 
 def test_remove_user():
@@ -54,3 +73,15 @@ def test_remove_nonexistent_user():
     # act, assert
     with pytest.raises(UserNotFoundError) as excinfo:
         lib.remove_user("Test user")
+
+
+def test_remove_book(clear_last_id):
+    # arrange
+    lib = Library()
+    lib.add_book("Test title", "Test author")
+
+    # act
+    lib.remove_book(1)
+
+    # assert
+    assert len(lib.books) == 0, "Book was not removed"

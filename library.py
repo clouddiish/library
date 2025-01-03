@@ -104,7 +104,8 @@ class Library:
 
     def remove_book(self, book_id):
         try:
-            self.books.remove(self.get_book(book_id))
+            book_to_remove = self.get_book(book_id)
+            self.books.remove(book_to_remove)
         except BookNotFoundError:
             raise BookNotFoundError
 
