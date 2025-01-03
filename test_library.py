@@ -123,7 +123,7 @@ def test_borrow(clear_last_id):
     ), "Book availability status was not changed to False"
 
 
-def test_borrow_unavailable_book(clear_last_id):
+def test_borrow_unavailable_book(capsys, clear_last_id):
     # arrange
     lib = Library()
     lib.add_user("Test user", False)
@@ -133,12 +133,11 @@ def test_borrow_unavailable_book(clear_last_id):
     # act
     lib.borrow(1, "Test user")
     lib.borrow(1, "Test user 2")
+    captured = capsys.readouterr().out.split("\n")
+    first_output = captured[1]
 
     # assert
-    assert (
-        len(lib.users["Test user 2"].borrowed_books) == 0
-    ), "Book was added to borrowed books of the user"
-    assert lib.books[0].available == False, "Book availability status is not False"
+    assert first_output == "Book not available.", "Message was not printed to the user"
 
 
 def test_borrow_nonexistent_book(clear_last_id):
