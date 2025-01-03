@@ -95,3 +95,39 @@ def test_remove_nonexistent_book(clear_last_id):
     # act, assert
     with pytest.raises(BookNotFoundError):
         lib.remove_book(5)
+
+
+def test_borrow(clear_last_id):
+    # arrange
+    lib = Library()
+    lib.add_user("Test user", False)
+    lib.add_book("Test title", "Test author")
+
+    # act
+    lib.borrow(1, "Test user")
+
+    # assert
+    assert (
+        len(lib.users["Test user"].borrowed_books) == 1
+    ), "Book was not added to borrowed books of the user"
+    assert (
+        lib.books[0].available == False
+    ), "Book availability status was not changed to False"
+
+
+def test_borrow_unavailable_book(clear_last_id):
+    # arrange
+    lib = Library()
+    lib.add_user("Test user", False)
+    lib.add_user("Test user 2", False)
+    lib.add_book("Test title", "Test author")
+
+    # act
+    lib.borrow(1, "Test user")
+    lib.borrow(1, "Test user 2")
+
+    # assert
+    assert (
+        len(lib.users["Test user 2"].borrowed_books) == 0
+    ), "Book was added to borrowed books of the user"
+    assert lib.books[0].available == False, "Book availability status is not False"
