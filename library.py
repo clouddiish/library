@@ -410,6 +410,9 @@ def do_action(action, library, user_name):
                 print("Action not allowed")
                 return
             del_username = input("Username to remove: ")
+            if del_username == user_name:
+                print("You cannot remove yourself.")
+                return
             library.remove_user(del_username)
             print("User removed.")
 
