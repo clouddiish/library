@@ -138,7 +138,7 @@ def test_borrow_book_when_book_is_unavailable(capsys, initialise_library):
 
     # act
     lib.borrow(1, "Test user")
-    lib.borrow(1, attempted_user)
+    lib.borrow(1, attempted_user.username)
 
     captured = capsys.readouterr().out.split("\n")
     message = captured[-2]
@@ -175,19 +175,22 @@ def test_unborrow_when_book_is_borrowed_by_the_user(initialise_library):
     ), "Book availability status was not changed to True"
 
 
-def test_unborrow_when_book_is_not_borrowed_by_the_user(capsys, initialise_library):
+def test_unborrow_when_book_is_not_borrowed_by_anyone(capsys, initialise_library):
     # arrange
     lib = initialise_library
+    attempted_book = lib.get_book(1)
 
     # act
     lib.unborrow(1, "Test user")
+
     captured = capsys.readouterr().out.split("\n")
-    first_output = captured[0]
+    message = captured[-2]
 
     # assert
     assert (
-        first_output == "You did not borrow this book."
+        message == "You did not borrow this book."
     ), "Message was not printed to the user"
+    assert attempted_book.available == True, "Book availability status is not True "
 
 
 def test_unborrow_book_when_book_is_nonexistent(capsys, initialise_library):
