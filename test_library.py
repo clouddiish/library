@@ -51,6 +51,7 @@ def test_add_book():
     assert added_book.title == title, "Book's title is incorrect"
     assert added_book.author == author, "Book's author is incorrect"
     assert added_book.available == True, "Book's availability should be True by default"
+    assert Book.last_id == 1, "Book last_id property is not 1"
 
 
 def test_get_book(initialise_library):
@@ -179,9 +180,10 @@ def test_unborrow_when_book_is_not_borrowed_by_anyone(capsys, initialise_library
     # arrange
     lib = initialise_library
     attempted_book = lib.get_book(1)
+    attempted_user = lib.get_user("Test user")
 
     # act
-    lib.unborrow(1, "Test user")
+    lib.unborrow(1, attempted_user.username)
 
     captured = capsys.readouterr().out.split("\n")
     message = captured[-2]
@@ -190,19 +192,26 @@ def test_unborrow_when_book_is_not_borrowed_by_anyone(capsys, initialise_library
     assert (
         message == "You did not borrow this book."
     ), "Message was not printed to the user"
-    assert attempted_book.available == True, "Book availability status is not True "
+    assert attempted_book.available == True, "Book availability status is not True"
+    assert (
+        len(attempted_user.borrowed_books) == 0
+    ), "User's borrowed books are not empty"
 
 
 def test_unborrow_book_when_book_is_nonexistent(capsys, initialise_library):
     # arrange
     lib = initialise_library
+    attempted_user = lib.get_user("Test user")
 
     # act
-    lib.unborrow(10, "Test user")
+    lib.unborrow(10, attempted_user.username)
     captured = capsys.readouterr().out.split("\n")
-    first_output = captured[0]
+    message = captured[-2]
 
     # assert
     assert (
-        first_output == "Book does not exist in the library."
+        message == "Book does not exist in the library."
     ), "Message was not printed to the user"
+    assert (
+        len(attempted_user.borrowed_books) == 0
+    ), "User's borrowed books are not empty"
