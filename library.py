@@ -90,6 +90,7 @@ class Library:
     def add_user(self, user_name, is_admin):
         if user_name not in self.users:
             self.users[user_name] = User(user_name, is_admin)
+            print("User added.")
         else:
             print("This username is already taken.")
 
@@ -194,7 +195,6 @@ def do_action(action, library, user_name):
                 return
             new_username = input("New username: ")
             library.add_user(new_username, False)
-            print("User added.")
 
         case "ab":
             # add book

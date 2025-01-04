@@ -8,7 +8,19 @@ def clear_last_id():
     Book.last_id = 0
 
 
-def test_add_user():
+@pytest.fixture
+def initialise_library(clear_last_id):
+    lib = Library()
+
+    lib.add_user("Test user", False)
+    lib.add_user("Test user 2", False)
+
+    lib.add_book("Test title", "Test author")
+
+    return lib
+
+
+def test_add_user_when_user_is_unique():
     # arrange
     lib = Library()
     user_name = "Test user"
@@ -26,7 +38,6 @@ def test_add_user():
 
 def test_add_book():
     # arrange
-    Book.last_id = 0
     lib = Library()
     title = "Test Title"
     author = "Test author"
@@ -42,10 +53,9 @@ def test_add_book():
     assert added_book.available == True, "Book's availability should be True by default"
 
 
-def test_get_book(clear_last_id):
+def test_get_book(initialise_library):
     # arrange
-    lib = Library()
-    lib.add_book("Test title", "Test author")
+    lib = initialise_library
 
     # act
     found_book = lib.get_book(1)
@@ -54,28 +64,29 @@ def test_get_book(clear_last_id):
     assert found_book.id == 1
 
 
-def test_get_nonexistent_book(clear_last_id):
+def test_get_book_when_book_is_nonexistent(initialise_library):
     # arrange
-    lib = Library()
+    lib = initialise_library
 
     # act, assert
     with pytest.raises(BookNotFoundError):
-        found_book = lib.get_book(1)
+        found_book = lib.get_book(10)
 
 
-def test_remove_user():
+def test_remove_user_when_user_exist(initialise_library):
     # arrange
-    lib = Library()
-    lib.add_user("Test user", False)
+    lib = initialise_library
+    initial_no_users = len(lib.users)
 
     # act
     lib.remove_user("Test user")
+    new_no_users = len(lib.users)
 
     # assert
-    assert len(lib.users) == 0, "User was not removed"
+    assert initial_no_users - new_no_users == 1, "User was not removed"
 
 
-def test_remove_nonexistent_user():
+def test_remove_user_when_user_is_nonexistent():
     # arrange
     lib = Library()
 
@@ -84,10 +95,9 @@ def test_remove_nonexistent_user():
         lib.remove_user("Test user")
 
 
-def test_remove_book(clear_last_id):
+def test_remove_book_when_book_exists(initialise_library):
     # arrange
-    lib = Library()
-    lib.add_book("Test title", "Test author")
+    lib = initialise_library
 
     # act
     lib.remove_book(1)
@@ -96,20 +106,18 @@ def test_remove_book(clear_last_id):
     assert len(lib.books) == 0, "Book was not removed"
 
 
-def test_remove_nonexistent_book(clear_last_id):
+def test_remove_book_when_book_is_nonexistent(initialise_library):
     # arrange
-    lib = Library()
+    lib = initialise_library
 
     # act, assert
     with pytest.raises(BookNotFoundError):
-        lib.remove_book(5)
+        lib.remove_book(10)
 
 
-def test_borrow(clear_last_id):
+def test_borrow_when_book_is_available(initialise_library):
     # arrange
-    lib = Library()
-    lib.add_user("Test user", False)
-    lib.add_book("Test title", "Test author")
+    lib = initialise_library
 
     # act
     lib.borrow(1, "Test user")
@@ -123,12 +131,9 @@ def test_borrow(clear_last_id):
     ), "Book availability status was not changed to False"
 
 
-def test_borrow_unavailable_book(capsys, clear_last_id):
+def test_borrow_book_when_book_is_unavailable(capsys, initialise_library):
     # arrange
-    lib = Library()
-    lib.add_user("Test user", False)
-    lib.add_user("Test user 2", False)
-    lib.add_book("Test title", "Test author")
+    lib = initialise_library
 
     # act
     lib.borrow(1, "Test user")
@@ -140,21 +145,18 @@ def test_borrow_unavailable_book(capsys, clear_last_id):
     assert first_output == "Book not available.", "Message was not printed to the user"
 
 
-def test_borrow_nonexistent_book(clear_last_id):
+def test_borrow_book_when_book_is_nonexistent(initialise_library):
     # arrange
-    lib = Library()
-    lib.add_user("Test user", False)
+    lib = initialise_library
 
     # act, assert
     with pytest.raises(BookNotFoundError):
-        lib.borrow(1, "Test user")
+        lib.borrow(10, "Test user")
 
 
-def test_unborrow(clear_last_id):
+def test_unborrow_when_book_is_borrowed_by_the_user(initialise_library):
     # arrange
-    lib = Library()
-    lib.add_user("Test user", False)
-    lib.add_book("Test title", "Test author")
+    lib = initialise_library
 
     # act
     lib.borrow(1, "Test user")
@@ -169,11 +171,9 @@ def test_unborrow(clear_last_id):
     ), "Book availability status was not changed to True"
 
 
-def test_unborrow_not_borrowed(capsys, clear_last_id):
+def test_unborrow_when_book_is_not_borrowed_by_the_user(capsys, initialise_library):
     # arrange
-    lib = Library()
-    lib.add_user("Test user", False)
-    lib.add_book("Test title", "Test author")
+    lib = initialise_library
 
     # act
     lib.unborrow(1, "Test user")
@@ -186,13 +186,12 @@ def test_unborrow_not_borrowed(capsys, clear_last_id):
     ), "Message was not printed to the user"
 
 
-def test_unborrow_nonexistent_book(capsys, clear_last_id):
+def test_unborrow_book_when_book_is_nonexistent(capsys, initialise_library):
     # arrange
-    lib = Library()
-    lib.add_user("Test user", False)
+    lib = initialise_library
 
     # act
-    lib.unborrow(1, "Test user")
+    lib.unborrow(10, "Test user")
     captured = capsys.readouterr().out.split("\n")
     first_output = captured[0]
 
