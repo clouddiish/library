@@ -134,15 +134,19 @@ def test_borrow_when_book_is_available(initialise_library):
 def test_borrow_book_when_book_is_unavailable(capsys, initialise_library):
     # arrange
     lib = initialise_library
+    attempted_user = lib.get_user("Test user 2")
 
     # act
     lib.borrow(1, "Test user")
-    lib.borrow(1, "Test user 2")
+    lib.borrow(1, attempted_user)
+
     captured = capsys.readouterr().out.split("\n")
-    first_output = captured[1]
+    message = captured[-2]
 
     # assert
-    assert first_output == "Book not available.", "Message was not printed to the user"
+    assert message == "Book not available.", "Message was not printed to the user"
+    assert lib.get_book(1).available == False, "Book availability status is not False"
+    assert len(attempted_user.borrowed_books) == 0, "User borrowed an unavailable book"
 
 
 def test_borrow_book_when_book_is_nonexistent(initialise_library):
