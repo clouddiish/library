@@ -21,6 +21,9 @@ def initialise_library(clear_last_id):
 
 
 def test_add_user_when_user_is_unique():
+    """
+    Test that user with unique username is added to the library
+    """
     # arrange
     lib = Library()
     user_name = "Test user"
@@ -37,6 +40,9 @@ def test_add_user_when_user_is_unique():
 
 
 def test_add_book():
+    """
+    Test that book is added to the library
+    """
     # arrange
     lib = Library()
     title = "Test Title"
@@ -54,7 +60,11 @@ def test_add_book():
     assert Book.last_id == 1, "Book last_id property is not 1"
 
 
-def test_get_book(initialise_library):
+def test_get_book_when_book_exists(initialise_library):
+    """
+    Check if it's possible to get a book that exists in the library
+    """
+
     # arrange
     lib = initialise_library
 
@@ -66,6 +76,10 @@ def test_get_book(initialise_library):
 
 
 def test_get_book_when_book_is_nonexistent(initialise_library):
+    """
+    Test that a BookNotFoundError is raised when trying to get a nonexistent book
+    """
+
     # arrange
     lib = initialise_library
 
@@ -75,6 +89,10 @@ def test_get_book_when_book_is_nonexistent(initialise_library):
 
 
 def test_remove_user_when_user_exist(initialise_library):
+    """
+    Test that an existing user is removed
+    """
+
     # arrange
     lib = initialise_library
     initial_no_users = len(lib.users)
@@ -88,6 +106,10 @@ def test_remove_user_when_user_exist(initialise_library):
 
 
 def test_remove_user_when_user_is_nonexistent():
+    """
+    Test that a UserNotFoundError is raised when trying to remove a nonexistent user
+    """
+
     # arrange
     lib = Library()
 
@@ -97,6 +119,10 @@ def test_remove_user_when_user_is_nonexistent():
 
 
 def test_remove_book_when_book_exists(initialise_library):
+    """
+    Test that an existing book is removed from the library
+    """
+
     # arrange
     lib = initialise_library
 
@@ -108,6 +134,10 @@ def test_remove_book_when_book_exists(initialise_library):
 
 
 def test_remove_book_when_book_is_nonexistent(initialise_library):
+    """
+    Test that a BookNotFoundError is raised when trying to remove a nonexistent book
+    """
+
     # arrange
     lib = initialise_library
 
@@ -117,6 +147,10 @@ def test_remove_book_when_book_is_nonexistent(initialise_library):
 
 
 def test_borrow_when_book_is_available(initialise_library):
+    """
+    Test that an available existent book is borrowed by an existing user
+    """
+
     # arrange
     lib = initialise_library
 
@@ -133,6 +167,11 @@ def test_borrow_when_book_is_available(initialise_library):
 
 
 def test_borrow_book_when_book_is_unavailable(capsys, initialise_library):
+    """
+    Test that an existing book is not borrowed when it's unavailable
+    and if an appropriate message is printed to the user
+    """
+
     # arrange
     lib = initialise_library
     attempted_user = lib.get_user("Test user 2")
@@ -151,6 +190,10 @@ def test_borrow_book_when_book_is_unavailable(capsys, initialise_library):
 
 
 def test_borrow_book_when_book_is_nonexistent(initialise_library):
+    """
+    Test that a BookNotFoundError is raised when user tries to borrow a nonexistent book
+    """
+
     # arrange
     lib = initialise_library
 
@@ -160,6 +203,10 @@ def test_borrow_book_when_book_is_nonexistent(initialise_library):
 
 
 def test_unborrow_when_book_is_borrowed_by_the_user(initialise_library):
+    """
+    Test that a borrowed book is unborrowed
+    """
+
     # arrange
     lib = initialise_library
 
@@ -177,6 +224,11 @@ def test_unborrow_when_book_is_borrowed_by_the_user(initialise_library):
 
 
 def test_unborrow_when_book_is_not_borrowed_by_anyone(capsys, initialise_library):
+    """
+    Test that an unborrowed book is not unborrowed when user tries to unborrow it,
+    and if an appropriate message is printed to the user
+    """
+
     # arrange
     lib = initialise_library
     attempted_book = lib.get_book(1)
@@ -199,6 +251,11 @@ def test_unborrow_when_book_is_not_borrowed_by_anyone(capsys, initialise_library
 
 
 def test_unborrow_book_when_book_is_nonexistent(capsys, initialise_library):
+    """
+    Test that a nonexistent book is not borrowed,
+    and if an appropriate message is printed to the user
+    """
+
     # arrange
     lib = initialise_library
     attempted_user = lib.get_user("Test user")
