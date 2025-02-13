@@ -39,8 +39,8 @@ python library.py
 ### output
 
 - on running the program, you'll be presented with a menu:
-  - l to log in or register
-  - e to exit the program
+  - `l` to log in or register
+  - `e` to exit the program
 
 - after logging in:
   - admin users have access to both user and book management menus
