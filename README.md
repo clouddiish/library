@@ -30,12 +30,11 @@ git clone https://github.com/clouddiish/library.git
 
 ### run
 
-- run the script with the below command
+- run the script with the below command. Note: if needed replace `library.py` with the name of the script
 
 ```
 python library.py
 ```
-  Note: if needed replace `library.py` with the name of the script
 
 ### output
 
